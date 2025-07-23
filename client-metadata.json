@@ -1,0 +1,9 @@
+{
+  "client_name": "My Aether",
+  "redirect_uris": [
+    "https://https://my-aether-six.vercel.app/callback"
+  ],
+  "client_uri": "https://https://my-aether-six.vercel.app",
+
+  "token_endpoint_auth_method": "none"
+}
