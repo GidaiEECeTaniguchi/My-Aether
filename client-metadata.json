@@ -3,7 +3,7 @@
   "redirect_uris": [
     "https://my-aether-six.vercel.app/callback"
   ],
-  "client_uri": "https://https://my-aether-six.vercel.app",
+  "client_uri": "https://my-aether-six.vercel.app",
 
   "token_endpoint_auth_method": "none"
 }
