@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "api/callback.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/callback.js"
+    }
+  ]
+}
