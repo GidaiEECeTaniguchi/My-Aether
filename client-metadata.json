@@ -1,4 +1,5 @@
 {
+  "client_id": "https://my-aether-six.vercel.app/client-metadata.json",
   "client_name": "My Aether",
   "redirect_uris": [
     "https://my-aether-six.vercel.app/callback"
@@ -6,5 +7,6 @@
   "client_uri": "https://my-aether-six.vercel.app",
 
   "token_endpoint_auth_method": "none",
-  "scope": "atproto transition:generic transition:chat.bsky"
+  "scope": "atproto transition:generic transition:chat.bsky",
+  "dpop_bound_access_tokens": true
 }
