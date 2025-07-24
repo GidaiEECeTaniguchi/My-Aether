@@ -1,34 +1,29 @@
-const express = require('express');
-const { AuthRequiredError, AtprotoOAuth } = require('@atproto/oauth-client-node');
-
-const app = express();
-
-// /api/callback というURLにアクセスがあった時の処理
-app.get('/api/callback', async (req, res) => {
-  // 1. URLから 'code' と 'state' を取得します
-  const { code, state } = req.query;
-
-  // ここに、前回解説したトークンを交換するロジックを記述します。
-  // 公式ライブラリを使うと、この部分が非常に簡単になります。
-  // (これはあくまでサンプルコードです)
-  try {
-    // 例：const client = new AtprotoOAuth(...);
-    //     await client.getAccessToken({ code });
+/**
+ * Blueskyの認証後、コールバックURLで実行されるスクリプト
+ * （ブラウザ側で動作します）
+ */
+window.onload = function() {
+    // 現在のページのURLから、クエリパラメータ（?以降の部分）を取得する
+    const urlParams = new URLSearchParams(window.location.search);
     
-    console.log('認証コード:', code);
-    console.log('アクセストークンの取得に成功！');
+    // 'code' と 'state' という名前のパラメータの値を取得する
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
 
-    // 4. トークンを保存し、ログイン処理を行う
-    // (セッションの設定など)
+    // もし 'code' がちゃんと取得できていたら
+    if (code) {
+        // アプリを呼び出すための特別なURL（カスタムURLスキーム）を組み立てる
+        // AndroidManifest.xmlで設定した 'myaether://callback' を使うよ
+        const redirectUrl = `myaether://callback?code=${code}&state=${state}`;
+        
+        // 組み立てたURLに、ページを移動させる
+        // これで、ブラウザからアプリに操作が戻るんだ
+        window.location.href = redirectUrl;
 
-    // 5. ログイン後のページへリダイレクト
-    res.redirect('/success.html'); // 仮の成功ページへ
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('エラーが発生しました。');
-  }
-});
-
-// Vercelがこのファイルを実行できるようにするためのおまじない
-module.exports = app;
+    } else {
+        // もし 'code' が取得できなかったら、エラーメッセージをコンソールに出力する
+        console.error("認可コードが見つかりませんでした。");
+        // 必要なら、ユーザー向けのメッセージを画面に表示してもいいね
+        // document.body.innerText = "エラー：アプリに戻れませんでした。";
+    }
+};
