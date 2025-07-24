@@ -6,5 +6,6 @@
   "client_uri": "https://my-aether-six.vercel.app",
 
   "token_endpoint_auth_method": "none",
-  "scope": "atproto transition:generic transition:chat.bsky"
+  "scope": "atproto transition:generic transition:chat.bsky",
+  "dpop_bound_access_tokens": true
 }
