@@ -2,7 +2,7 @@
   "client_id": "https://my-aether-six.vercel.app/client-metadata.json",
   "client_name": "My Aether",
   "redirect_uris": [
-    "https://my-aether-six.vercel.app/callback"
+    "https://my-aether-six.vercel.app/api/callback"
   ],
   "client_uri": "https://my-aether-six.vercel.app",
 
