@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/callback",
-      "destination": "/callback.html"
+      "source": "/api/callback",
+      "destination": "/api/callback"
     }
   ]
 }
