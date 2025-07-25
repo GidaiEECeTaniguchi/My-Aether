@@ -1,51 +1,58 @@
-/**
- * Blueskyの認証後、コールバックURLで実行されるスクリプト
- * （ブラウザ側で動作します）
- */
-window.onload = function() {
-    console.log("callback.js loaded");
-    console.log("Current URL:", window.location.href);
-    
-    // 現在のページのURLから、クエリパラメータ（?以降の部分）を取得する
-    const urlParams = new URLSearchParams(window.location.search);
-    console.log("URL params:", window.location.search);
-    
-    // 'code' と 'state' という名前のパラメータの値を取得する
-    const code = urlParams.get('code');
-    const state = urlParams.get('state');
-    
-    console.log("Extracted code:", code);
-    console.log("Extracted state:", state);
 
-    // もし 'code' がちゃんと取得できていたら
-    if (code) {
-        // アプリを呼び出すための特別なURL（カスタムURLスキーム）を組み立てる
-        // AndroidManifest.xmlで設定した 'myaether://callback' を使うよ
-        const redirectUrl = `myaether://callback?code=${code}&state=${state || ''}`;
-        console.log("Redirect URL:", redirectUrl);
-        
-        // ページに状況を表示
-        document.body.innerHTML = `<p>アプリに戻っています...</p><p>リダイレクトURL: ${redirectUrl}</p>`;
-        
-        // 少し待ってからリダイレクト
-        setTimeout(() => {
-            console.log("Attempting redirect to:", redirectUrl);
-            try {
-                window.location.href = redirectUrl;
-            } catch (error) {
-                console.error("Redirect failed:", error);
-                document.body.innerHTML += `<p>エラー: ${error.message}</p>`;
-            }
-        }, 1000);
-        
-        // フォールバック：5秒後にエラーメッセージを表示
-        setTimeout(() => {
-            document.body.innerHTML += '<p>アプリが見つかりません。手動でアプリを開いてください。</p>';
-        }, 6000);
+import axios from 'axios';
 
-    } else {
-        console.error("認可コードが見つかりませんでした。");
-        console.log("Available parameters:", Array.from(urlParams.entries()));
-        document.body.innerHTML = '<p>エラー：認証に失敗しました。認可コードが見つかりません。</p>';
+// Vercelのサーバーレス関数として定義
+export default async function handler(req, res) {
+    // クエリパラメータから 'code' と 'state' を取得
+    const { code, state } = req.query;
+
+    // --- 重要：これらの値はVercelの環境変数に設定すること ---
+    // ここでは仮で直接記述するけど、本番環境では絶対にやめてね
+    const CLIENT_ID = process.env.BLUESKY_CLIENT_ID || 'YOUR_CLIENT_ID'; // Vercelの環境変数から取得するか、仮の値を設定
+    const CLIENT_SECRET = process.env.BLUESKY_CLIENT_SECRET || 'YOUR_CLIENT_SECRET'; // Vercelの環境変数から取得するか、仮の値を設定
+    const REDIRECT_URI = process.env.BLUESKY_REDIRECT_URI || 'https://my-aether-six.vercel.app/api/callback'; // このAPI自体のURL
+    const PDS_URL = 'https://bsky.social'; // BlueskyのPDS
+    // ---------------------------------------------------------
+
+    if (!code) {
+        return res.status(400).send('エラー：認可コード(code)が見つかりません。');
     }
-};
+
+    try {
+        // BlueskyのトークンエンドポイントにPOSTリクエストを送信
+        const tokenResponse = await axios.post(`${PDS_URL}/oauth/token`, {
+            grant_type: 'authorization_code',
+            code: code,
+            redirect_uri: REDIRECT_URI,
+            client_id: CLIENT_ID,
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        // 取得したトークン
+        const { access_token, refresh_token, sub } = tokenResponse.data;
+
+        // アプリのカスタムURLスキームを使ってリダイレクト
+        const redirectUrl = `myaether://callback?access_token=${access_token}&refresh_token=${refresh_token}&user_did=${sub}&state=${state || ''}`;
+
+        // 302リダイレクトでユーザーのブラウザをアプリに誘導する
+        res.redirect(302, redirectUrl);
+
+    } catch (error) {
+        console.error('トークン交換中にエラーが発生しました:', error.response ? error.response.data : error.message);
+        
+        // エラー情報を表示するHTMLを返す
+        res.status(500).send(`
+            <html>
+                <body>
+                    <h1>トークンの取得に失敗しました</h1>
+                    <p>エラー内容:</p>
+                    <pre>${JSON.stringify(error.response ? error.response.data : { message: error.message }, null, 2)}</pre>
+                    <p>アプリに戻ってやり直してください。</p>
+                </body>
+            </html>
+        `);
+    }
+}
