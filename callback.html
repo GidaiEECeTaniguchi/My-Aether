@@ -1,12 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirecting to My Aether...</title>
+</head>
+<body>
+    <p>アプリに戻っています、ちょっと待っててね...</p>
+    <p id="debug-info"></p>
+    
+    <script>
+        window.onload = function() {
+            console.log("callback script loaded");
+            console.log("Current URL:", window.location.href);
+            
+            // デバッグ情報を画面に表示
+            const debugElement = document.getElementById('debug-info');
+            
+            // 現在のページのURLから、クエリパラメータ（?以降の部分）を取得する
+            const urlParams = new URLSearchParams(window.location.search);
+            console.log("URL params:", window.location.search);
+            
+            // 'code' と 'state' という名前のパラメータの値を取得する
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            
+            console.log("Extracted code:", code);
+            console.log("Extracted state:", state);
+            
+            // デバッグ情報を表示
+            debugElement.innerHTML = `
+                <strong>デバッグ情報:</strong><br>
+                URL: ${window.location.href}<br>
+                Code: ${code ? code.substring(0, 10) + '...' : 'なし'}<br>
+                State: ${state || 'なし'}<br>
+            `;
 
-    1 <!DOCTYPE html>
-    2 <html>
-    3 <head>
-    4     <title>Redirecting to My Aether...</title>
-    5     <!-- このHTMLページが読み込まれたら、すぐに下のJavaScriptファイルを実行する -->
-    6     <script src="api/callback.js"></script>
-    7 </head>
-    8 <body>
-    9     <p>アプリに戻っています、ちょっと待っててね...</p>
-   10 </body>
-   11 </html>
+            // もし 'code' がちゃんと取得できていたら
+            if (code) {
+                // アプリを呼び出すための特別なURL（カスタムURLスキーム）を組み立てる
+                const redirectUrl = `myaether://callback?code=${code}&state=${state || ''}`;
+                console.log("Redirect URL:", redirectUrl);
+                
+                // ページに状況を表示
+                debugElement.innerHTML += `<br><br>リダイレクト先: ${redirectUrl}<br>`;
+                debugElement.innerHTML += `<br>2秒後にアプリに戻ります...`;
+                
+                // 少し待ってからリダイレクト
+                setTimeout(() => {
+                    console.log("Attempting redirect to:", redirectUrl);
+                    try {
+                        window.location.href = redirectUrl;
+                    } catch (error) {
+                        console.error("Redirect failed:", error);
+                        debugElement.innerHTML += `<br><span style="color: red;">エラー: ${error.message}</span>`;
+                    }
+                }, 2000);
+                
+                // フォールバック：7秒後にエラーメッセージを表示
+                setTimeout(() => {
+                    debugElement.innerHTML += '<br><span style="color: orange;">アプリが見つかりません。手動でアプリを開いてください。</span>';
+                }, 7000);
+
+            } else {
+                console.error("認可コードが見つかりませんでした。");
+                console.log("Available parameters:", Array.from(urlParams.entries()));
+                debugElement.innerHTML += '<br><span style="color: red;">エラー：認証に失敗しました。認可コードが見つかりません。</span>';
+            }
+        };
+    </script>
+</body>
+</html>
