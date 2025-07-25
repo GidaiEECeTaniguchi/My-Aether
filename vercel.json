@@ -1,9 +1,8 @@
 {
-
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/callback.js"
+      "source": "/callback",
+      "destination": "/callback.html"
     }
   ]
 }
