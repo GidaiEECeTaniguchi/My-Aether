@@ -1,5 +1,5 @@
 
-import axios from 'axios';
+const axios = require('axios');
 
 // Vercelのサーバーレス関数として定義
 export default async function handler(req, res) {
