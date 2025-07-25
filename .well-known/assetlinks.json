@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.testapp.bluesky_api_test",
+      "sha256_cert_fingerprints": [
+        "11:1F:1F:21:21:2D:9C:0B:21:4A:A0:0B:98:9C:F5:15:46:53:13:E2:4C:1A:7A:25:42:99:08:B8:76:24:39:25"
+      ]
+    }
+  }
+]
